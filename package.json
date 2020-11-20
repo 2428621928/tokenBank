@@ -1,0 +1,19 @@
+{
+  "name": "conflux.hbuilder",
+  "version": "1.0.0",
+  "description": "#### Description laypig.com",
+  "main": "main.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "big": "^0.5.2",
+    "clipboard": "^2.0.6"
+  }
+}

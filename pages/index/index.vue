@@ -8,8 +8,19 @@
 			<!-- 标题栏和状态栏占位符 -->
 			<view class="titleNview-placing">
 				<view class="laypig-cells">
-					<view class="laypig-cell" style="float:left;width:20%;"><label class="laypig-label" style="text-align:center;" @click="login()">登录</label></view>
-					<view class="laypig-cell" style="width:60%;"><label style="text-align: center;font-size:16px;"></label></view>
+					<view class="laypig-cell" style="float:left;width:20%;">
+						<label v-show="null == account" class="laypig-label" style="text-align:center;" @click="login()">登录</label>
+						<image v-show="null != account" :src="avatarSrc" class="avatarIcon" mode="widthFix"></image>
+					</view>
+					<view class="laypig-cell" style="width:50%;" v-show="null != account">
+						<label style="text-align: center;font-size:16px;color:#FFFFFF;">总计CFX：{{hideBalanceStatus? hideStr : cfxBalance}}</label>
+					</view>
+					<view class="laypig-cell" style="width:10%;" v-show="null != account">
+						<image v-show="!hideBalanceStatus" :src="canViewSrc" class="eyeIcon" mode="widthFix" @click="hiddenBalance()"></image>
+						<image v-show="hideBalanceStatus" :src="canNotViewSrc" class="eyeIcon" mode="widthFix" @click="hiddenBalance()"></image>
+						
+					</view>
+					
 					<view class="laypig-cell" style="float:right;width:20%;">
 						<image :src="searchSrc" class="searchIcon" mode="widthFix" @click="goDetailPage('tokenSearch')"></image>
 					</view>
@@ -20,7 +31,7 @@
 			<!-- <view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view> -->
 			<swiper class="carousel" circular @change="swiperChange" style="height:124px;">
 				<swiper-item style="height:353upx;" v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToDetailPage({title: '轮播广告'})">
-					<image :src="item.src" mode="widthFix" />
+					<image :src="item.src" mode="aspectFill" />
 				</swiper-item>
 			</swiper>
 			<!-- 自定义swiper指示器 -->
@@ -130,20 +141,18 @@
 				</scroll-view>
 				
 			</view>
-			
-			
-			
 	
-			
+			<confirm-install :show="linkInstallStatus" v-on:cancel="installConfluxPortal" v-on:confirm="installConfluxPortal"></confirm-install>
 		
 	</view>
+	
 	
 	
 
 </template>
 
 <script>
-	// import loginConfirm from '@/components/loginConfirm.vue'
+	import confirmInstall from '@/components/confirmInstall.vue'
 	
 	const tokenBankAbi = require('../../abi/tokenBank.json')
 	
@@ -153,28 +162,32 @@
 	
 	
 	export default {
-		// components: {
-		// 	loginConfirm
-		// },
+		components: {
+			confirmInstall
+		},
 		data() {
 			return {
 				tokenBankAbi: tokenBankAbi,
 				tokenBankContract: null,
 				account: null,
+				cfxBalance: null,
 				titleNViewBackground: '',
 				swiperCurrent: 0,
 				swiperLength: 0,
 				carouselList: [],
 				goodsList: [],
+				linkInstallStatus: false,
+				hideBalanceStatus: false,
+				hideStr: '******',
 				admin: false,
-				loginAuthorization: false,
-				loginUserInfo: app.globalData.loginUserInfo,
-				hasUserInfo: false,
 				changeSrc: '',
 				listSrc: '',
 				favoriteSrc: '',
 				copySrc: '',
 				searchSrc: '',
+				avatarSrc: '',
+				canViewSrc: '',
+				canNotViewSrc: '',
 				topTokenList: [],
 				grids: [],
 				divHeight: 240,
@@ -188,6 +201,21 @@
 			
 			this.loadData();
 			
+			if(null == this.account) {
+				if(typeof window.conflux !== 'undefined') {
+					
+					if(conflux.isConfluxPortal) {
+						
+						if(null != conflux.selectedAddress) {
+							
+							this.login()
+														
+						} 
+					} 
+				}
+			}
+			
+			
 		},
 		onShareAppMessage() {
 			return {
@@ -196,7 +224,9 @@
 			}
 		},
 		onTabItemTap(index) {
-			//console.log(index)
+			if(null != app.globalData.userInfo && null == this.account) {
+				this.login()
+			}
 		},
 		methods: {
 			async login() {
@@ -209,6 +239,7 @@
 							try {
 								const accounts = await conflux.enable()
 								this.account = accounts[0]
+								app.globalData.userInfo = this.account
 																
 							} catch (error) {
 								console.log(error)
@@ -217,17 +248,18 @@
 							
 						} else {
 							this.account = conflux.selectedAddress
+							app.globalData.userInfo = this.account
 						}
 						
 						this.getBalance();
 						
 						
 					} else {
-						app.globalData.promise.alert("当前浏览器未安装 Conflux Portal")
+						this.linkInstallStatus = true
 					}
 					
 				} else {
-					 app.globalData.promise.alert("当前浏览器未安装 Conflux Portal")
+					 this.linkInstallStatus = true
 				}
 			},
 			/**
@@ -246,16 +278,28 @@
 				this.favoriteSrc = boxIcon.favoriteSrc
 				this.copySrc = boxIcon.copyWhiteSrc
 				this.searchSrc = boxIcon.searchSrc
+				this.avatarSrc = boxIcon.avatarSrc
+				this.canViewSrc = boxIcon.canViewSrc
+				this.canNotViewSrc = boxIcon.canNotViewSrc
 				
 				this.titleNViewBackground = carouselList[0].background;
 				this.swiperLength = carouselList.length;
 				this.carouselList = carouselList;
-			
-				this.loadTopToken()
 				
-				this.loadTokens()
-				
-				// this.getBalance()
+				if(typeof window.conflux !== 'undefined') {
+					
+					if(app.globalData.confluxNetwork != conflux.networkVersion) {
+						app.globalData.promise.alert('请切换到' + app.globalData.confluxNetworkStr)
+						
+						return;
+					}
+					
+					this.loadTopToken()
+					
+					this.loadTokens()
+					
+				}
+		
 
 			},
 			refresh: function () {
@@ -266,6 +310,10 @@
 			  this.loadTokens()
 			  
 			},
+			hiddenBalance: function() {
+				this.hideBalanceStatus = this.hideBalanceStatus ? false : true
+					
+			},
 			analyticalObject(coinInfo) {
 
 				let coinObj = {}
@@ -273,16 +321,16 @@
 				coinObj['firstLetter'] = coinInfo[0][1].substring(0,1)
 				coinObj['name'] = coinInfo[0][1]
 				coinObj['address'] = coinInfo[0][2]
-				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length -1)
+				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length )
 				coinObj['token'] = tokenTemp
-				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length -1)
+				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length )
 				coinObj['owner'] = ownerTemp
 				coinObj['ownerAddress'] = coinInfo[0][3]
 				
 				let decimals = Big(coinInfo[0][11]).times(1).toFixed()
 				
-				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(2)
-				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(2)
+				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(0)
+				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(0)
 				coinObj['holderNum'] = Big(coinInfo[0][6]).times(1).toFixed()
 				coinObj['haveNum'] = Big(coinInfo[0][7]).times(10 ** (decimals * -1)).toFixed(4)
 
@@ -291,87 +339,113 @@
 				return coinObj;
 			},
 			async loadTopToken() {
-				//初始化合约
-				if(null == app.globalData.tokenBankContract) {
-						
-					app.globalData.tokenBankContract = confluxJS.Contract({
-					  abi: app.globalData.tokenBankAbi,
-					  address: app.globalData.tokenBankAddress
-					});
+				
+				//判断当前浏览器，是否包含 conflux portal
+				if(typeof window.conflux !== 'undefined') {
 					
-				}
-				
-				//获取 top token list
-				var topResult = await app.globalData.tokenBankContract.getTopToken(0, 2)
-				
-				this.topTokenList = []
-				
-				for(var i = 0 ; i < topResult[0].length; i++) {
-					
-					if("0x0000000000000000000000000000000000000000" == topResult[0][i]) {
-						continue;
-					} else {
-						let coinInfo = null
-						
-						if(null == this.account) {
-							coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", topResult[0][i])
+					//初始化合约
+					if(null == app.globalData.tokenBankContract) {
 							
-						} else {
-							coinInfo = await app.globalData.tokenBankContract.getTokenInfo(this.account, topResult[0][i])
-						}
-						
-						let coinObj = this.analyticalObject(coinInfo)
-						//封装 coinInfo List 对象(
-						this.topTokenList.push( coinObj)
+						app.globalData.tokenBankContract = confluxJS.Contract({
+						  abi: app.globalData.tokenBankAbi,
+						  address: app.globalData.tokenBankAddress
+						});
 						
 					}
 					
-				}
-			},
-			async loadTokens() {
-				app.globalData.promise.showLoading("加载中...")
-				
-				//初始化合约
-				if(null == app.globalData.tokenBankContract) {
+					//获取 top token list
+					var topResult = await app.globalData.tokenBankContract.getTopToken(0, 2)
+					
+					this.topTokenList = []
+					
+					for(var i = 0 ; i < topResult[0].length; i++) {
 						
-					app.globalData.tokenBankContract = confluxJS.Contract({
-					  abi: app.globalData.tokenBankAbi,
-					  address: app.globalData.tokenBankAddress
-					});
-					
-				}
-				
-				
-				//获取 token List
-				var result = await app.globalData.tokenBankContract.getHomeTokenList(this.pageIndex, this.rows);
-				
-				
-				for(var j = 0 ; j < result[0].length; j++) {
-					
-					if("0x0000000000000000000000000000000000000000" == result[0][j]) {
-						continue;
-					} else {
-						if(null == this.account) {
-							let coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", result[0][j])
+						if("0x0000000000000000000000000000000000000000" == topResult[0][i]) {
+							continue;
+						} else {
+							let coinInfo = null
+							
+							if(null == this.account) {
+								coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", topResult[0][i])
+								
+							} else {
+								coinInfo = await app.globalData.tokenBankContract.getTokenInfo(this.account, topResult[0][i])
+							}
 							
 							let coinObj = this.analyticalObject(coinInfo)
 							//封装 coinInfo List 对象(
-							this.grids.push( coinObj)
+							this.topTokenList.push( coinObj)
 							
-							//this.pageIndex = this.pageIndex > Big(result[1][j]).times(1).toFixed() ? this.pageIndex : Big(result[1][j]).times(1).toFixed()
-							this.pageIndex = Big(result[1][j]).times(1).toFixed() 
-							
-						} else {
-							var coinInfo = await app.globalData.tokenBankContract.getTokenInfo(this.account, result[0][j])
 						}
 						
-						
+					}
+				} else {
+					//提示下载钱包
+					this.linkInstallStatus = true
+				}
+				
+				
+			},
+			async loadTokens() {
+				console.log(1)
+				
+				if(typeof window.conflux !== 'undefined') {
+					
+					app.globalData.promise.showLoading("加载中...")
+					
+					//初始化合约
+					if(null == app.globalData.tokenBankContract) {
+							
+						app.globalData.tokenBankContract = confluxJS.Contract({
+						  abi: app.globalData.tokenBankAbi,
+						  address: app.globalData.tokenBankAddress
+						});
 						
 					}
 					
+					
+					//获取 token List
+					var result = await app.globalData.tokenBankContract.getHomeTokenList(this.pageIndex, this.rows);
+					
+					console.log(result)
+					for(var j = 0 ; j < result[0].length; j++) {
+						
+						if("0x0000000000000000000000000000000000000000" == result[0][j]) {
+							continue;
+						} else {
+							if(null == this.account) {
+								let coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", result[0][j])
+								
+								let coinObj = this.analyticalObject(coinInfo)
+								//封装 coinInfo List 对象(
+								this.grids.push( coinObj)
+								
+								//this.pageIndex = this.pageIndex > Big(result[1][j]).times(1).toFixed() ? this.pageIndex : Big(result[1][j]).times(1).toFixed()
+								this.pageIndex = Big(result[1][j]).times(1).toFixed() 
+								
+							} else {
+								var coinInfo = await app.globalData.tokenBankContract.getTokenInfo(this.account, result[0][j])
+								
+								let coinObj = this.analyticalObject(coinInfo)
+								//封装 coinInfo List 对象(
+								this.grids.push( coinObj)
+								
+								//this.pageIndex = this.pageIndex > Big(result[1][j]).times(1).toFixed() ? this.pageIndex : Big(result[1][j]).times(1).toFixed()
+								this.pageIndex = Big(result[1][j]).times(1).toFixed() 
+							}
+							
+							
+							
+						}
+						
+					}
+					
+					app.globalData.promise.hideLoading()
+				} else {
+					//提示下载钱包
+					this.linkInstallStatus = true
 				}
 				
-				app.globalData.promise.hideLoading()
 				
 			},
 			copyAddress: function() {
@@ -439,47 +513,18 @@
 				}
 						
 			},
+			installConfluxPortal(e) {
+				this.linkInstallStatus = false			
+			},
 			async getBalance() {
 				const accounts = await conflux.enable()
 				var account = accounts[0]
 				
-				// var contractAddr = "0x80a3620b98d0c02d6874780b3fb6d6559279feef";
-				// 	var abiJson = this.tokenBankAbi
-					
-					var contract = confluxJS.Contract({
-						  abi: app.globalData.tokenBankAbi,
-						  address: app.globalData.tokenBankAddress
-						});
 				
-				// var result = await contract.addTopToken("0x86f70b96b3fab8037c0c12bb4f494a5539c29024", "")
-				// .sendTransaction({ from: account })
-				// .confirmed()
+				const balance = await confluxJS.getBalance(account);
+				this.cfxBalance = ConfluxJSSDK.util.unit.fromDripToCFX(balance)
+				this.cfxBalance = Big(this.cfxBalance).times(1).toFixed(6)
 				
-					// var result = await contract.getHomeTokenList(0, 10);
-					//ConfluxJSSDK.util.unit.fromDripToCFX(result)
-					
-					// for(var j = 0 ; j < result[0].length; j++) {
-					// 	var coinInfo = await contract.getTokenInfo(this.account, result[0][j])
-						
-					// 	console.log(coinInfo)
-					// }
-					
-
-					// console.log( result[1] );
-					
-					// for(var i = 0 ; i < result[1].length; i++) {
-					// 	console.log(ConfluxJSSDK.util.unit.fromDripToCFX(result[1][i]) )
-					// }
-					
-					//发布 token
-					//var result = await contract.publishToken(['CFX','CFX',5000000000,'imageUrl',true,true,18,'Conlux 公链代币','{"name":"shily","sex":"女","age":"23"}']);
-					// var result = await contract.publishToken(["CFX","CFX", 5000000000,"/abc",true,true,18,"Conlux 公链代币","def"])
-					// .sendTransaction({ from: accounts[0] })
-					// .confirmed()
-					
-					// console.log(result);
-					
-					
 					
 			}
 		}

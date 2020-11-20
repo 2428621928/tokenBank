@@ -1,0 +1,98 @@
+{
+	"pages": [
+		{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "Conflux",
+				"app-plus": {
+					"bounce": "vertical"
+				}
+			}
+		}
+        ,{
+            "path" : "pages/functions/tokenManage/tokenManage",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/issueToken/issueToken",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/issueTokenForm20/issueTokenForm20",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/issueTokenForm721/issueTokenForm721",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/issueModel/issueModel",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/my/my",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/tokenDetail/tokenDetail",
+            "style" : {}
+        }
+        ,{
+            "path" : "pages/functions/tokenSearch/tokenSearch",
+            "style" : {}
+        }
+    ],
+	"subPackages": [
+	],
+	"globalStyle": {
+		"navigationStyle":"custom",
+		"navigationBarTextStyle": "white",
+		"navigationBarTitleText": "Conflux ",
+		"navigationBarBackgroundColor": "#000000",
+		"backgroundColor": "#000000",
+		"backgroundColorTop": "#F4F5F6",
+		"backgroundColorBottom": "#F4F5F6",
+		"mp-alipay": {
+			"titleBarColor": "#FFFFFF"
+		},
+		"mp-wx": {
+			"titleBarColor": "#000000"
+		}
+	},
+	"tabBar": {
+		"color": "#A6A3C1",
+		"selectedColor": "#FFFFFF",
+		"borderStyle": "black",
+		"backgroundColor": "#38358F",
+		"list": [{
+				"pagePath": "pages/index/index",
+				"iconPath": "static/images/Homegray.png",
+				"selectedIconPath": "static/images/Home.png",
+				"text": "首页"
+			},{
+				"pagePath":"pages/functions/issueToken/issueToken",
+				"iconPath":"static/images/faxingtokengray.png",
+				"selectedIconPath":"static/images/faxingtoken.png",
+				"text": "发行token"
+				
+			},{
+				"pagePath":"pages/functions/my/my",
+				"iconPath":"static/images/tokengray.png",
+				"selectedIconPath":"static/images/token.png",
+				"text": "token"
+				
+			}
+
+		]
+	},
+	"condition" : { //模式配置，仅开发期间生效
+		"current": 0, //当前激活的模式(list 的索引项)
+		"list": [
+			{
+				"name": "", //模式名称
+				"path": "pages/index/index", //启动页面，必选
+				"query": "" //启动参数，在页面的onLoad函数里面得到
+			}
+		]
+	}
+}

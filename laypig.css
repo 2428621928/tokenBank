@@ -231,6 +231,20 @@ uni-switch .uni-switch-input.uni-switch-input-checked {
 	float: right;
 }
 
+.avatarIcon {
+	width: 20px;
+	display: inline-block;
+	margin: 0px 15px;
+	float: center;
+}
+
+.eyeIcon {
+	width: 24px;
+	display: inline-block;
+	margin: 5px 15px;
+	float: center;
+}
+
 .changeIcon {
 	/* height: 50px; */
 	width: 56px;

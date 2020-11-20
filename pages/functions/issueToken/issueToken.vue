@@ -13,7 +13,7 @@
 			<!-- <view class="titleNview-background" :style="{backgroundColor:titleNViewBackground}"></view> -->
 			<swiper class="carousel" circular @change="swiperChange" style="height:124px;">
 				<swiper-item style="height:353upx;" v-for="(item, index) in carouselList" :key="index" class="carousel-item" @click="navToDetailPage({title: '轮播广告'})">
-					<image :src="item.src" mode="widthFix" />
+					<image :src="item.src" mode="aspectFill" />
 				</swiper-item>
 			</swiper>
 			<!-- 自定义swiper指示器 -->
@@ -54,6 +54,7 @@
 		</view>
 				
 		
+		<confirm-install :show="linkInstallStatus" v-on:cancel="installConfluxPortal" v-on:confirm="installConfluxPortal"></confirm-install>
 	</view>
 	
 	
@@ -61,12 +62,13 @@
 </template>
 
 <script>
-	import loginConfirm from '@/components/loginConfirm.vue'
+	import confirmInstall from '@/components/confirmInstall.vue'
+	
 	const app = getApp()
 	
 	export default {
 		components: {
-			loginConfirm
+			confirmInstall
 		},
 		data() {
 			return {
@@ -75,10 +77,7 @@
 				swiperLength: 0,
 				carouselList: [],
 				goodsList: [],
-				admin: false,
-				loginAuthorization: false,
-				loginUserInfo: app.globalData.loginUserInfo,
-				hasUserInfo: false,
+				linkInstallStatus: false,
 				changeSrc: '',
 				listSrc: '',
 				favoriteSrc: '',
@@ -141,127 +140,66 @@
 			  that.loadTokens()
 			  
 			},
-			async loadTokens() {
-				app.globalData.promise.showLoading("加载中...")
-						
-				let grids = await this.$api.json('grids')
-				console.log(grids)
-				this.grids = grids
-				
-				app.globalData.promise.hideLoading()
-				// app.globalData.promise.get(app.globalData.remoteServerPath + 'api/wechat/donateListDataGrid.do', { page: that.page, rows: that.rows}).then(function (res) {
-				  
-				//   if (res.data.success) {
-							
-				//     if(that.page == 1) {
-				//       that.grids = res.data.items
-							
-				//     } else {
-				//       that.grids = that.grids.concat(res.data.items)
-							
-				//     }
-				    
-							
-				//     for (var index in that.grids) {
-				//       that.grids[index].nowDate = app.globalData.util.formatDate(new Date(that.grids[index].nowDate))
-				//     }
-							
-							
-				//     app.globalData.promise.hideLoading()
-							
-				//   } else {
-				//     app.globalData.promise.login()
-							
-				//     uni.navigateBack()
-							
-				//   }
-							
-				// }).catch(function (res) {
-				//   console.log(res)
-				// })
-			},
+			
 			//轮播图切换修改背景色
 			swiperChange(e) {
 				const index = e.detail.current;
 				this.swiperCurrent = index;
 				this.titleNViewBackground = this.carouselList[index].background;
 			},
-			//详情页
-			navToDetailPage(item) {
-				//测试数据没有写id，用title代替
-				let id = item.title;
-				uni.navigateTo({
-					url: `/pages/product/product?id=${id}`
-				})
-			},
-			validLogin: function(callback) {
-				var that = this
-				
-				uni.getSetting({
-					success(res) {
-						if(res.authSetting['scope.userInfo']) {
-							if( app.globalData.loginUserInfo ) {
-								app.globalData.promise.validationLogin(app.globalData.loginUserInfo)
-							} else {
-								app.globalData.promise.login()
-							}
-							
-							callback(null == app.globalData.loginUserInfo ? false : true)
-						} else {
-							//当没有登录权限时候，提示授权登录
-							that.loginAuthorization = true
-							
-							callback(false)
-						}
-					}
-				})
-			},
-			triggerCollapse(e) {
-				if (!this.lists[e].pages) {
-					this.goDetailPage(this.lists[e].url);
-					return;
-				}
-				for (var i = 0; i < this.lists.length; ++i) {
-					if (e === i) {
-						this.lists[i].open = !this.lists[e].open;
-					} else {
-						this.lists[i].open = false;
-					}
-				}
+			installConfluxPortal(e) {
+				this.linkInstallStatus = false			
 			},
 			goDetailPage(e) {
 				var that = this
 				
-					
-				if (typeof e === 'string') {
-					uni.navigateTo({
-						url: '/pages/functions/' + e + '/' + e
-					})
+				//判断用户是否已登录
+				if(null != app.globalData.userInfo) {
+					if (typeof e === 'string') {
+						uni.navigateTo({
+							url: '/pages/functions/' + e + '/' + e
+						})
+					} else {
+						uni.navigateTo({
+							url: e.url
+						})
+					}
 				} else {
-					uni.navigateTo({
-						url: e.url
-					})
+					this.login()
 				}
 						
 			},		
-			login(e) {
+			async login() {
+				if(typeof window.conflux !== 'undefined') {
+					
+					if(conflux.isConfluxPortal) {
+						
+						if(null == conflux.selectedAddress) {
+							
+							try {
+								const accounts = await conflux.enable()
+								this.account = accounts[0]
+								app.globalData.userInfo = this.account
+																
+							} catch (error) {
+								console.log(error)
+							}
+							
+							
+						} else {
+							this.account = conflux.selectedAddress
+							app.globalData.userInfo = this.account
+						}
+						
+						
+					} else {
+						this.linkInstallStatus = true
+					}
+					
+				} else {
+					 this.linkInstallStatus = true
+				}
 				
-				var that = this
-						
-				if (e.type == 'confirm') {
-				  uni.getSetting({
-				    success(res) {
-				      if (res.authSetting['scope.userInfo']) {
-				        app.globalData.promise.login()
-				      } else {
-				        console.log('还没授权上')
-				      }
-				    }
-				  })
-				} 
-						
-				//隐藏授权框
-				that.loginAuthorization = false
 			}
 		}
 	}
@@ -846,7 +784,6 @@
 	}
 	
 	.shuoming {
-		font-size:1vw;
 		-webkit-transform: scale(0.80);
 		color: rgb(186, 186, 188);
 		width: 100%;

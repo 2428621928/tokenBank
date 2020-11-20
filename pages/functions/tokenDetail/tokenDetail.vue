@@ -66,7 +66,7 @@
 						<button class="btn green" @click="showSendToken()">发送</button>	
 					</view>
 					<view class="laypig-cells">
-						<button v-if="coinObj.burning" class="btn orange" @click="showBurnToken()">燃烧</button>
+						<button v-if="coinObj.ownerAddress == account && coinObj.burning" class="btn orange" @click="showBurnToken()">燃烧</button>
 						<button v-else class="btn gray">燃烧</button>
 					</view>
 					<view class="laypig-cells">
@@ -270,16 +270,16 @@
 				coinObj['firstLetter'] = coinInfo[0][1].substring(0,1)
 				coinObj['name'] = coinInfo[0][1]
 				coinObj['address'] = coinInfo[0][2]
-				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length -1)
+				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length )
 				coinObj['token'] = tokenTemp
-				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length -1)
+				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length )
 				coinObj['owner'] = ownerTemp
 				coinObj['ownerAddress'] = coinInfo[0][3]
 				
 				let decimals = Big(coinInfo[0][11]).times(1).toFixed()
 				
-				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(2)
-				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(2)
+				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(0)
+				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(0)
 				coinObj['holderNum'] = Big(coinInfo[0][6]).times(1).toFixed()
 				coinObj['haveNum'] = Big(coinInfo[0][7]).times(10 ** (decimals * -1)).toFixed(4)
 				
@@ -358,6 +358,16 @@
 				this.sendStatus = false
 						
 				if (e.type == 'confirm') {
+					//判断余额是否充足
+					console.log(e.tokenNum, this.coinObj.haveNum)
+					if(e.tokenNum > this.coinObj.haveNum) {
+						app.globalData.promise.showToast('余额不足', function() {
+							
+						}, 3500)
+						
+						return false;
+					}
+					
 					app.globalData.promise.showLoading("加载中...")
 					
 					const accounts = await conflux.enable()
@@ -371,11 +381,9 @@
 				  	});
 				  }
 				  
-				  var result = await this.erc20Contract.transfer(e.targetAddress , e.tokenNum * (10 ** coinObj.decimals ))
+				  var result = await this.erc20Contract.transfer(e.targetAddress , e.tokenNum * (10 ** this.coinObj.decimals ))
 				  .sendTransaction({ from: this.account })
 				  .confirmed()
-				  
-				  console.log(result)
 				  
 				  app.globalData.promise.hideLoading()
 				  
@@ -389,6 +397,16 @@
 				this.burnStatus = false
 				
 				if (e.type == 'confirm') {
+					
+					console.log(e.tokenNum, this.coinObj.haveNum)
+					if(e.tokenNum > this.coinObj.haveNum) {
+						app.globalData.promise.showToast('余额不足', function() {
+							
+						}, 3500)
+						
+						return false;
+					}
+					
 					app.globalData.promise.showLoading("加载中...")
 					
 					const accounts = await conflux.enable()
@@ -402,7 +420,7 @@
 					});
 					}
 
-					var result = await this.erc20Contract.burn( e.tokenNum * (10 ** coinObj.decimals ) )
+					var result = await this.erc20Contract.burn( e.tokenNum * (10 ** this.coinObj.decimals ) )
 					.sendTransaction({ from: this.account })
 					.confirmed()
 
@@ -421,6 +439,15 @@
 				
 				if (e.type == 'confirm') {
 					
+					console.log(e.tokenNum, this.coinObj.haveNum)
+					if(e.tokenNum > this.coinObj.haveNum) {
+						app.globalData.promise.showToast('余额不足', function() {
+							
+						}, 3500)
+						
+						return false;
+					}
+					
 					app.globalData.promise.showLoading("加载中...")
 					
 					const accounts = await conflux.enable()
@@ -434,11 +461,9 @@
 				  	});
 				  }
 				  
-				  var result = await this.erc20Contract.airdrop(e.targetAddress , e.tokenNum * (10 ** coinObj.decimals ) )
+				  var result = await this.erc20Contract.airdrop(e.targetAddress , e.tokenNum * (10 ** this.coinObj.decimals ) )
 				  .sendTransaction({ from: this.account })
 				  .confirmed()
-				  
-				  console.log(result)
 				  
 				  app.globalData.promise.hideLoading()
 				  

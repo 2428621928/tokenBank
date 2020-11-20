@@ -77,7 +77,10 @@ const boxIcon = {
 	searchSrc: "/static/images/Search.png",
 	searchGraySrc: "/static/images/search-gray.png",
 	backSrc: "/static/images/back.png",
-	back2Src: "/static/images/back2.png"
+	back2Src: "/static/images/back2.png",
+	avatarSrc: "/static/images/Avatar.png",
+	canViewSrc: "/static/images/Eye.png",
+	canNotViewSrc: "/static/images/CanNotView.png"
 }
 
 export default {

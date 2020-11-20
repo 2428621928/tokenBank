@@ -41,8 +41,8 @@
 						
 								
 							</view>
-							<view class="laypig-cells" v-show="item.showDetail" @click="changeShowStatus(index)">
-								<view class="" style="color:#bababc;width:50%;display:inline-block;">
+							<view class="laypig-cells" v-show="item.showDetail" >
+								<view class="" style="color:#bababc;width:50%;display:inline-block;" @click="changeShowStatus(index)">
 									<view style="display:block;">
 										<view style="display:inline-block;font-size:12px;min-width:59px;">总量:</view><text class="token-num">{{item.total}}</text>
 									</view>
@@ -59,12 +59,12 @@
 									<view style="display:block;">
 										<view style="display:inline-block;font-size:12px;min-width:40px;">地址:</view>
 										<text style="display:inline-block;color:#000000;font-size:12px;">{{item.token}}</text>
-										<image :src="copySrc" class="copy2Icon" mode="widthFix"></image>
+										<image :src="copySrc" class="copy2Icon copy2Address" mode="widthFix" :data-clipboard-text="item.address" data-clipboard-action="copy" @click="copyAddress()"></image>
 									</view>
 									<view style="display:block;margin: 5px 0;">
 										<view style="display:inline-block;font-size:12px;min-width:40px;">owner:</view>
 										<text style="display:inline-block;color:#000000;font-size:12px;">{{item.owner}}</text>
-										<image :src="copySrc" class="copy2Icon" mode="widthFix"></image>
+										<image :src="copySrc" class="copy2Icon copy2Owner" mode="widthFix" :data-clipboard-text="item.ownerAddress" data-clipboard-action="copy" @click="copyOwner()"></image>
 									</view>
 								</view>
 							</view>
@@ -101,8 +101,8 @@
 						
 								
 							</view>
-							<view class="laypig-cells" v-show="item.showDetail" @click="changeShowStatus(index)">
-								<view class="" style="color:#bababc;width:50%;display:inline-block;">
+							<view class="laypig-cells" v-show="item.showDetail" >
+								<view class="" style="color:#bababc;width:50%;display:inline-block;" @click="changeShowStatus(index)">
 									<view style="display:block;">
 										<view style="display:inline-block;font-size:12px;min-width:59px;">总量:</view><text class="token-num">{{item.total}}</text>
 									</view>
@@ -119,12 +119,12 @@
 									<view style="display:block;">
 										<view style="display:inline-block;font-size:12px;min-width:40px;">地址:</view>
 										<text style="display:inline-block;color:#000000;font-size:12px;">{{item.token}}</text>
-										<image :src="copySrc" class="copy2Icon" mode="widthFix"></image>
+										<image :src="copySrc" class="copy2Icon copy2Address" mode="widthFix" :data-clipboard-text="item.address" data-clipboard-action="copy" @click="copyAddress()"></image>
 									</view>
 									<view style="display:block;margin: 5px 0;">
 										<view style="display:inline-block;font-size:12px;min-width:40px;">owner:</view>
 										<text style="display:inline-block;color:#000000;font-size:12px;">{{item.owner}}</text>
-										<image :src="copySrc" class="copy2Icon" mode="widthFix"></image>
+										<image :src="copySrc" class="copy2Icon copy2Owner" mode="widthFix" :data-clipboard-text="item.ownerAddress" data-clipboard-action="copy" @click="copyOwner()"></image>
 									</view>
 								</view>
 							</view>
@@ -146,7 +146,7 @@
 			
 			
 			
-			
+			<confirm-install :show="linkInstallStatus" v-on:cancel="installConfluxPortal" v-on:confirm="installConfluxPortal"></confirm-install>
 	
 			
 		
@@ -158,11 +158,13 @@
 
 <script>
 	
+	import confirmInstall from '@/components/confirmInstall.vue'
 	const app = getApp()
 	const Big = require('big.js')
 	
 	export default {
 		components: {
+			confirmInstall
 		},
 		data() {
 			return {
@@ -171,6 +173,7 @@
 				favoriteSrc: '',
 				copySrc: '',
 				grids: [],
+				linkInstallStatus: false,
 				collectionList: [],
 				myTokenList: [],
 				divHeight: 240,
@@ -197,7 +200,7 @@
 		onLoad:function(){
 			
 			// 页面显示是默认选中第一个
-			this.tabCurrentIndex = 0;
+			this.tabCurrentIndex = 1;
 			
 			this.loadData();
 
@@ -227,6 +230,30 @@
 				this.tabCurrentIndex = index;
 				
 				this.loadTokens()
+			},
+			copyAddress: function() {
+				
+				let _this = this;
+				let clipboard = new this.clipboard(".copy2Address");
+			
+				clipboard.on('success', function () {
+					app.globalData.promise.showToast('复制成功')
+				});
+				clipboard.on('error', function () {
+					app.globalData.promise.showToast('复制失败')
+				});
+			},
+			copyOwner: function() {
+				
+				let _this = this;
+				let clipboard = new this.clipboard(".copy2Owner");
+			
+				clipboard.on('success', function () {
+					app.globalData.promise.showToast('复制成功')
+				});
+				clipboard.on('error', function () {
+					app.globalData.promise.showToast('复制失败')
+				});
 			},
 			goDetailPage(e, paramObj) {
 				var that = this
@@ -274,6 +301,9 @@
 			  this.loadTokens()
 			  
 			},
+			installConfluxPortal(e) {
+				this.linkInstallStatus = false			
+			},
 			analyticalObject(coinInfo) {
 			
 				let coinObj = {}
@@ -281,15 +311,16 @@
 				coinObj['firstLetter'] = coinInfo[0][1].substring(0,1)
 				coinObj['name'] = coinInfo[0][1]
 				coinObj['address'] = coinInfo[0][2]
-				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length -1)
+				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length )
 				coinObj['token'] = tokenTemp
-				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length -1)
+				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length )
 				coinObj['owner'] = ownerTemp
+				coinObj['ownerAddress'] = coinInfo[0][3]
 				
 				let decimals = Big(coinInfo[0][11]).times(1).toFixed() 
 				
-				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(2)
-				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(2)
+				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(0)
+				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(0)
 				coinObj['holderNum'] = Big(coinInfo[0][6]).times(1).toFixed()
 				coinObj['haveNum'] = Big(coinInfo[0][7]).times(10 ** (decimals * -1)).toFixed(4)
 				coinObj['showDetail'] = false
@@ -298,69 +329,77 @@
 				return coinObj;
 			},
 			async loadTokens() {
-				app.globalData.promise.showLoading("加载中...")
-				
-				const accounts = await conflux.enable()
-				var account = accounts[0]
-				let index = this.tabCurrentIndex
-				
-				//初始化合约
-				if(null == app.globalData.userTokenContract) {
-						
-					app.globalData.userTokenContract = confluxJS.Contract({
-					  abi: app.globalData.userTokenAbi,
-					  address: app.globalData.userTokenAddress
-					});
+				if(typeof window.conflux !== 'undefined') {
+					app.globalData.promise.showLoading("加载中...")
 					
-				}
-				
-				//获取 top token list
-
-				var tempList = await app.globalData.userTokenContract.getUserTokenList(index, account, 0 == index ? this.pageIndex0 : this.pageIndex1, this.rows)
-				//暂时使用清空的方法
-				
-				for(var i = 0 ; i < tempList[0].length; i++) {
+					const accounts = await conflux.enable()
+					var account = accounts[0]
 					
-					if("0x0000000000000000000000000000000000000000" == tempList[0][i]) {
-						continue;
-					} else {
-						let coinInfo = null
-						
-						if(null == account) {
+					app.globalData.userInfo = account
+					
+					let index = this.tabCurrentIndex
+					
+					//初始化合约
+					if(null == app.globalData.userTokenContract) {
 							
-							coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", tempList[0][i])
-							
-						} else {
-							
-							coinInfo = await app.globalData.tokenBankContract.getTokenInfo(account, tempList[0][i])
-						}
-						
-						//如果为空
-						if("0x0000000000000000000000000000000000000000" == coinInfo[0][2]) {
-							continue;
-						}
-						
-						let coinObj = this.analyticalObject(coinInfo)
-						
-						//封装 coinInfo List 对象(
-						if(0 == index) {
-							this.collectionList.push( coinObj)
-							
-							this.pageIndex0 = Big(tempList[1][i]).times(1).toFixed() 
-						} else {
-							this.myTokenList.push( coinObj)
-							this.pageIndex1 = Big(tempList[1][i]).times(1).toFixed() 
-						}
-						
-						
+						app.globalData.userTokenContract = confluxJS.Contract({
+						  abi: app.globalData.userTokenAbi,
+						  address: app.globalData.userTokenAddress
+						});
 						
 					}
 					
+					//获取 top token list
+					
+					var tempList = await app.globalData.userTokenContract.getUserTokenList(index, account, 0 == index ? this.pageIndex0 : this.pageIndex1, this.rows)
+					//暂时使用清空的方法
+					
+					for(var i = 0 ; i < tempList[0].length; i++) {
+						
+						if("0x0000000000000000000000000000000000000000" == tempList[0][i]) {
+							continue;
+						} else {
+							let coinInfo = null
+							
+							if(null == account) {
+								
+								coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", tempList[0][i])
+								
+							} else {
+								
+								coinInfo = await app.globalData.tokenBankContract.getTokenInfo(account, tempList[0][i])
+							}
+							
+							//如果为空
+							if("0x0000000000000000000000000000000000000000" == coinInfo[0][2]) {
+								continue;
+							}
+							
+							let coinObj = this.analyticalObject(coinInfo)
+							
+							//封装 coinInfo List 对象(
+							if(0 == index) {
+								this.collectionList.push( coinObj)
+								
+								this.pageIndex0 = Big(tempList[1][i]).times(1).toFixed() 
+							} else {
+								this.myTokenList.push( coinObj)
+								this.pageIndex1 = Big(tempList[1][i]).times(1).toFixed() 
+							}
+							
+							
+							
+						}
+						
+					}
+					
+					
+					
+					app.globalData.promise.hideLoading()
+				} else {
+					this.linkInstallStatus = true
 				}
 				
-				
-				
-				app.globalData.promise.hideLoading()
 				
 			}
 		}

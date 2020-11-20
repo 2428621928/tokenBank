@@ -173,28 +173,34 @@
 			switch2Change: function() {
 				this.coinInfo.burning = this.coinInfo.burning? false : true
 			},
-			refresh: function () {
-			  var that = this
-			  that.loadTokens()
-			},
-			loadMore: function() {
-			  var that = this
-			  that.page += 1
-			  
-			  that.loadTokens()
-			  
-			},
-			async loadTokens() {
-				app.globalData.promise.showLoading("加载中...")
-						
-				let grids = await this.$api.json('grids')
-				
-				this.grids = grids
-				
-				app.globalData.promise.hideLoading()
-				
-			},
 			toNext() {
+				
+				//校验数据合法性
+				if("" == this.coinInfo.tokenName) {
+					app.globalData.promise.alert('名称不能为空')
+					return;
+				}
+				
+				if("" == this.coinInfo.shorthandName) {
+					app.globalData.promise.alert('简称不能为空')
+					return;
+				}
+				
+				if("" == this.coinInfo.decimals) {
+					app.globalData.promise.alert('小数位不能为空')
+					return;
+				}
+				
+				if("" == this.coinInfo.total) {
+					app.globalData.promise.alert('总量不能为空')
+					return;
+				}
+				
+				if("" == this.coinInfo.note) {
+					app.globalData.promise.alert('介绍不能为空')
+					return;
+				}
+				
 				app.globalData.issueTokenInfo = this.coinInfo
 				
 				uni.navigateTo({

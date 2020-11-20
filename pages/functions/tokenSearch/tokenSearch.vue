@@ -18,7 +18,7 @@
 					<view class="laypig-cell" style="float:right;"><label style="text-align:center;" class="laypig-label label-search" @click="tokenSearch">搜索</label></view>
 					
 				</view>
-				<view class="laypig-cells" v-show="searchResult"><label style="color:#FFFFFF;margin-left: 40px;">{{resultStr}}</label></view>
+				<view class="laypig-cells" v-show="searchResult"><label style="color:#FFFFFF;margin-left: 40px;">{{searchResultList.length > 0 ? resultStr : '未找到搜索结果。'}}</label></view>
 			</view>
 			<view v-show="initStatus">
 				<view class="laypig-cells">
@@ -33,7 +33,7 @@
 					
 				</view>
 				
-				<view class="laypig-cells" v-show="searchResult">
+				<!-- <view class="laypig-cells" v-show="searchResult">
 					<label style="color:#FFFFFF;font-size:18px;">历史搜索</label>
 					
 				</view>
@@ -45,7 +45,7 @@
 						<label class="search-hot-label">FGB</label>
 					</view>
 					
-				</view>
+				</view> -->
 			
 			</view>
 			
@@ -101,7 +101,7 @@
 				</view>
 			</view>
 				
-		
+			<confirm-install :show="linkInstallStatus" v-on:cancel="installConfluxPortal" v-on:confirm="installConfluxPortal"></confirm-install>
 	</view>
 	
 	
@@ -113,8 +113,12 @@
 	const app = getApp()
 	
 	const Big = require('big.js')
+	import confirmInstall from '@/components/confirmInstall.vue'
 	
 	export default {
+		components: {
+			confirmInstall
+		},
 		data() {
 			return {
 				initStatus: true,
@@ -122,6 +126,7 @@
 				searchWord: null,
 				searchResultList: [],
 				resultStr: "搜索结果如下",
+				linkInstallStatus: false,
 				changeSrc: '',
 				listSrc: '',
 				favoriteSrc: '',
@@ -165,7 +170,22 @@
 				this.backSrc = boxIcon.back2Src
 				this.searchSrc = boxIcon.searchGraySrc
 				
-				this.loadTokens()
+				if(typeof window.conflux !== 'undefined') {
+					
+					if(app.globalData.confluxNetwork != conflux.networkVersion) {
+						app.globalData.promise.alert('请切换到' + app.globalData.confluxNetworkStr)
+						
+						return;
+					}
+					
+					this.loadTokens()
+					
+				} else {
+					//提示下载钱包
+					this.linkInstallStatus = true
+				}
+				
+				
 
 			},
 			setSearchWord: function(item) {
@@ -176,11 +196,12 @@
 			  //that.loadTokens()
 			},
 			loadMore: function() {
-			  var that = this
-			  that.page += 1
 			  
-			  that.loadTokens()
+			  this.loadTokens()
 			  
+			},
+			installConfluxPortal(e) {
+				this.linkInstallStatus = false			
 			},
 			navigateBack: function() {
 				
@@ -256,17 +277,22 @@
 				
 				let result = await app.globalData.tokenBankContract.getTokenByShorthandName(this.searchWord , accounts[0])
 				
+				console.log(result)
+				
 				this.searchResultList = []
 				
 				let coinInfo = result[0]
 				
 				let isCollection = result[1]
 				
-				if(null != result && result) {
+				if(null != result && result && result[0][0]) {
 					this.initStatus = false
 					this.searchResult = true
 					this.searchResultList.push(this.analyticalObject([coinInfo]) )
 					
+				} else {
+					this.initStatus = false
+					this.searchResult = true
 				}
 				
 				
@@ -279,16 +305,16 @@
 				coinObj['firstLetter'] = coinInfo[0][1].substring(0,1)
 				coinObj['name'] = coinInfo[0][1]
 				coinObj['address'] = coinInfo[0][2]
-				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length -1)
+				let tokenTemp = coinInfo[0][2].substring(0,6) + "***" + coinInfo[0][2].substring(coinInfo[0][2].length - 4, coinInfo[0][2].length )
 				coinObj['token'] = tokenTemp
-				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length -1)
+				let ownerTemp = coinInfo[0][3].substring(0,6) + "***" + coinInfo[0][3].substring(coinInfo[0][3].length - 4, coinInfo[0][3].length )
 				coinObj['owner'] = ownerTemp
 				coinObj['ownerAddress'] = coinInfo[0][3]
 				
 				let decimals = Big(coinInfo[0][11]).times(1).toFixed()
 				
-				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(2)
-				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(2)
+				coinObj['total'] = Big(coinInfo[0][4]).times(10 ** (decimals * -1)).toFixed(0)
+				coinObj['totalSupply'] = Big(coinInfo[0][5]).times(10 ** (decimals * -1)).toFixed(0)
 				coinObj['holderNum'] = Big(coinInfo[0][6]).times(1).toFixed()
 				coinObj['haveNum'] = Big(coinInfo[0][7]).times(10 ** (decimals * -1)).toFixed(4)
 				
