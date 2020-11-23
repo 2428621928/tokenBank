@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -193,7 +194,6 @@
 					
 				}
 				
-				console.log(1)
 				if(null == this.userTokenContract) {
 						
 					this.userTokenContract = confluxJS.Contract({

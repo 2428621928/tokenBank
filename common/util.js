@@ -1,3 +1,4 @@
+/*** @author：君莫 @date: 2018年08月19日 **/
 const formatNumber = n => {
   n = n.toString()
   return n[1] ? n : '0' + n

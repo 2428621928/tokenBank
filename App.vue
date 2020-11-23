@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <script>
 	const promise = require('./common/js/promise.js')
 	const util = require('./common/util.js')

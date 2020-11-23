@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -151,7 +152,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			//console.log(index)
 		},
 		methods: {
 			/**
@@ -277,7 +278,6 @@
 				
 				let result = await app.globalData.tokenBankContract.getTokenByShorthandName(this.searchWord , accounts[0])
 				
-				console.log(result)
 				
 				this.searchResultList = []
 				

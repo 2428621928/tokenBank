@@ -1,3 +1,4 @@
+/*** @author：君莫 @date: 2018年08月19日 **/
 const Promise = require('../../lib/es6-promise.min.js')
 
 const remoteServerPath = "http://localhost:9090/";

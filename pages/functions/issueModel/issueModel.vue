@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -87,8 +88,7 @@
 			}
 		},
 		onLoad:function(){
-			console.log("issue model")
-			console.log(app.globalData.issueTokenInfo)
+
 			this.loadData();
 
 		},
@@ -99,7 +99,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			//console.log(index)
 		},
 		methods: {
 			/**

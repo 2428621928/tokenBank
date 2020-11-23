@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	<view class="container">
@@ -131,7 +132,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			//console.log(index)
 		},
 		methods: {
 			/**

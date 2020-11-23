@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -212,7 +213,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			//console.log(index)
 		},
 		methods: {
 			changeShowStatus(index) {
@@ -224,7 +225,6 @@
 				
 			},
 			changeTab(e) {
-				console.log(e)
 				this.tabCurrentIndex = e.target.current;
 				
 			},

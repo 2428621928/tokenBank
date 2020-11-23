@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -9,7 +10,7 @@
 				<view class="titleNview-placing" style="color: white;text-align: center;font-size: 20px;">
 					<view class="laypig-cell" style="float:left;width:20%;"><label class="laypig-label">&lt;</label></view>
 					<view class="laypig-cell" style="width:60%;"><label style="text-align: center;font-size:16px;">发行ERC721</label></view>
-					<view class="laypig-cell" style="float:right;width:20%;"><label style="text-align:center;" class="laypig-label" @click="toNext">下一步</label></view>
+					<view class="laypig-cell" style="float:right;width:20%;"><label style="text-align:center;" class="laypig-label" >下一步</label></view>
 					
 				</view>
 			</view>
@@ -156,7 +157,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			//console.log(index)
 		},
 		methods: {
 			/**
@@ -199,7 +200,7 @@
 				app.globalData.promise.showLoading("加载中...")
 						
 				let grids = await this.$api.json('grids')
-				console.log(grids)
+				
 				this.grids = grids
 				
 				app.globalData.promise.hideLoading()

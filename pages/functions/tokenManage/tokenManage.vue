@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 	<view class="page">
 	    <view class="page__bd page__bd_spacing">

@@ -1,3 +1,4 @@
+<!-- @author：君莫 @date: 2020年11月23日-->
 <template>
 
 	
@@ -342,7 +343,7 @@
 				
 				//判断当前浏览器，是否包含 conflux portal
 				if(typeof window.conflux !== 'undefined') {
-					console.log(app.globalData.tokenBankAddress)
+					
 					//初始化合约
 					if(null == app.globalData.tokenBankContract) {
 							
@@ -353,13 +354,8 @@
 						
 					}
 					
-					console.log(1)
 					//获取 top token list
 					var topResult = await app.globalData.tokenBankContract.getTopToken(0, 2)
-					
-					console.log(2)
-					
-					console.log(topResult)
 					
 					this.topTokenList = []
 					
