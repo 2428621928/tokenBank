@@ -1,0 +1,78 @@
+[
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "string",
+          "name": "_words",
+          "type": "string"
+        }
+      ],
+      "name": "del",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "contract ITokenBank",
+          "name": "_tokenBank",
+          "type": "address"
+        }
+      ],
+      "name": "setTokenBank",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_words",
+          "type": "string"
+        }
+      ],
+      "name": "addWords",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_words",
+          "type": "string"
+        }
+      ],
+      "name": "checkWords",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "result",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_words",
+          "type": "string"
+        }
+      ],
+      "name": "removeWord",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ]

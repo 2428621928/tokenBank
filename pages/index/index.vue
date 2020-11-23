@@ -287,12 +287,12 @@
 				this.carouselList = carouselList;
 				
 				if(typeof window.conflux !== 'undefined') {
-					
-					if(app.globalData.confluxNetwork != conflux.networkVersion) {
-						app.globalData.promise.alert('请切换到' + app.globalData.confluxNetworkStr)
+					// app.globalData.promise.alert(conflux.networkVersion)
+					// if(app.globalData.confluxNetwork != conflux.networkVersion) {
+					// 	app.globalData.promise.alert('请切换到' + app.globalData.confluxNetworkStr)
 						
-						return;
-					}
+					// 	return;
+					// }
 					
 					this.loadTopToken()
 					
@@ -342,7 +342,7 @@
 				
 				//判断当前浏览器，是否包含 conflux portal
 				if(typeof window.conflux !== 'undefined') {
-					
+					console.log(app.globalData.tokenBankAddress)
 					//初始化合约
 					if(null == app.globalData.tokenBankContract) {
 							
@@ -353,8 +353,13 @@
 						
 					}
 					
+					console.log(1)
 					//获取 top token list
 					var topResult = await app.globalData.tokenBankContract.getTopToken(0, 2)
+					
+					console.log(2)
+					
+					console.log(topResult)
 					
 					this.topTokenList = []
 					
@@ -366,6 +371,7 @@
 							let coinInfo = null
 							
 							if(null == this.account) {
+								
 								coinInfo = await app.globalData.tokenBankContract.getTokenInfo("0x0000000000000000000000000000000000000000", topResult[0][i])
 								
 							} else {
@@ -387,7 +393,6 @@
 				
 			},
 			async loadTokens() {
-				console.log(1)
 				
 				if(typeof window.conflux !== 'undefined') {
 					
@@ -407,7 +412,6 @@
 					//获取 token List
 					var result = await app.globalData.tokenBankContract.getHomeTokenList(this.pageIndex, this.rows);
 					
-					console.log(result)
 					for(var j = 0 ; j < result[0].length; j++) {
 						
 						if("0x0000000000000000000000000000000000000000" == result[0][j]) {

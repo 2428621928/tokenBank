@@ -149,7 +149,7 @@
 							
 					}
 					
-					var result = await app.globalData.tokenBankContract.publishToken([coinInfo.tokenName, coinInfo.shorthandName , coinInfo.total * (10 ** coinInfo.decimals ) , '' , coinInfo.increase ,coinInfo.burning , coinInfo.decimals , coinInfo.note,""])
+					var result = await app.globalData.tokenBankContract.publishToken([coinInfo.tokenName, coinInfo.shorthandName , coinInfo.total * (10 ** coinInfo.decimals ) , '' , coinInfo.increase ,coinInfo.burning , coinInfo.decimals , coinInfo.note,''])
 					.sendTransaction({ from: account })
 					.confirmed()
 					

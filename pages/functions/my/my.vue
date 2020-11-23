@@ -212,7 +212,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			//console.log(index)
+			console.log(index)
 		},
 		methods: {
 			changeShowStatus(index) {
@@ -224,7 +224,9 @@
 				
 			},
 			changeTab(e) {
+				console.log(e)
 				this.tabCurrentIndex = e.target.current;
+				
 			},
 			tabClick(index) {
 				this.tabCurrentIndex = index;

@@ -170,7 +170,7 @@
 			}
 		},
 		onTabItemTap(index) {
-			console.log(index)
+			
 		},
 		methods: {
 			/**
@@ -193,6 +193,7 @@
 					
 				}
 				
+				console.log(1)
 				if(null == this.userTokenContract) {
 						
 					this.userTokenContract = confluxJS.Contract({
@@ -222,6 +223,7 @@
 					app.globalData.promise.alert("还未登录不能收藏")
 					
 				} else {
+					
 					this.sczt = await this.userTokenContract.isCollection(this.account, address)
 					
 					this.favoriteBlueSrc = boxIcon.favoriteBlueSrc
@@ -229,7 +231,7 @@
 					this.favoriteSrc = boxIcon.favoriteSrc
 					
 				}
-				
+
 				this.changeSrc = boxIcon.changeSrc
 				this.listSrc = boxIcon.listSrc
 				this.copySrc = boxIcon.copySrc
@@ -252,7 +254,7 @@
 					
 				} else {
 					
-					var result = await this.userTokenContract.collectionToken(this.tokenAddress, 2)
+					var result = await this.userTokenContract.collectionToken(this.tokenAddress, 0)
 					.sendTransaction({ from: this.account })
 					.confirmed()
 					
@@ -359,7 +361,7 @@
 						
 				if (e.type == 'confirm') {
 					//判断余额是否充足
-					console.log(e.tokenNum, this.coinObj.haveNum)
+					
 					if(e.tokenNum > this.coinObj.haveNum) {
 						app.globalData.promise.showToast('余额不足', function() {
 							
@@ -368,7 +370,7 @@
 						return false;
 					}
 					
-					app.globalData.promise.showLoading("加载中...")
+					app.globalData.promise.showLoading("发送中...")
 					
 					const accounts = await conflux.enable()
 					this.account = accounts[0]
@@ -387,6 +389,10 @@
 				  
 				  app.globalData.promise.hideLoading()
 				  
+				  if(null != result && 0 == result.outcomeStatus) {
+					  this.loadData(this.tokenAddress);
+				  }
+				  
 				} 
 						
 				
@@ -398,7 +404,7 @@
 				
 				if (e.type == 'confirm') {
 					
-					console.log(e.tokenNum, this.coinObj.haveNum)
+					
 					if(e.tokenNum > this.coinObj.haveNum) {
 						app.globalData.promise.showToast('余额不足', function() {
 							
@@ -407,7 +413,7 @@
 						return false;
 					}
 					
-					app.globalData.promise.showLoading("加载中...")
+					app.globalData.promise.showLoading("燃烧中...")
 					
 					const accounts = await conflux.enable()
 					this.account = accounts[0]
@@ -424,9 +430,12 @@
 					.sendTransaction({ from: this.account })
 					.confirmed()
 
-					console.log(result)
 				  
 				    app.globalData.promise.hideLoading()
+					
+					if(null != result && 0 == result.outcomeStatus) {
+						  this.loadData(this.tokenAddress);
+					}
 				  
 				} 
 						
@@ -439,16 +448,7 @@
 				
 				if (e.type == 'confirm') {
 					
-					console.log(e.tokenNum, this.coinObj.haveNum)
-					if(e.tokenNum > this.coinObj.haveNum) {
-						app.globalData.promise.showToast('余额不足', function() {
-							
-						}, 3500)
-						
-						return false;
-					}
-					
-					app.globalData.promise.showLoading("加载中...")
+					app.globalData.promise.showLoading("空投中...")
 					
 					const accounts = await conflux.enable()
 					this.account = accounts[0]
@@ -461,11 +461,26 @@
 				  	});
 				  }
 				  
-				  var result = await this.erc20Contract.airdrop(e.targetAddress , e.tokenNum * (10 ** this.coinObj.decimals ) )
-				  .sendTransaction({ from: this.account })
-				  .confirmed()
+				  try {
+					  var result = await this.erc20Contract.airdrop(e.targetAddress , e.tokenNum * (10 ** this.coinObj.decimals ) )
+					  .sendTransaction({ from: this.account })
+					  .confirmed()
+				  } catch(e) {
+					  if(4001 == e.code) {
+						  
+					  }
+				  }
+				  
+				  
 				  
 				  app.globalData.promise.hideLoading()
+				  
+				  if(null != result && 0 == result.outcomeStatus) {
+					  this.loadData(this.tokenAddress);
+				  }
+				  
+				  
+				  
 				  
 				} 
 						
@@ -578,12 +593,12 @@
 	}
 	
 	.favoriteIcon {
-		width: 29upx;
+		width: 40upx;
 		display: inline-block;
-		margin-left: 8px;
+		margin-left: 16px;
 		margin-right: 3px;
 		margin-top: 9px;
-		margin-bottom: 24px;
+		margin-bottom: 13px;
 
 	}
 	
